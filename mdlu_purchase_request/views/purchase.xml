@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="purchase_order_line_form_purchase_request" model="ir.ui.view">
+    <field name="name">purchase.order.line.form.purchase.request</field>
+    <field name="model">purchase.order</field>
+    <field name="inherit_id" ref="purchase.purchase_order_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//notebook/page[1]/field[@name='order_line']/form/sheet/group/group" position="inside">
+        <field name="item_name"/>
+        <field name="web_address"/>
+      </xpath>
+      <xpath expr="//notebook/page[1]/field[@name='order_line']/tree/field[@name='name']" position="after">
+        <field name="item_name"/>
+      </xpath>
+      <xpath expr="//notebook/page[1]/field[@name='order_line']/tree" position="inside">
+        <button name="cancel_line_item" type="object" icon="fa-ban" style="color:red;"
+                groups="purchase.group_purchase_manager" title="Cancel" states="draft,sent,to_approve"/>
+      </xpath>
+    </field>
+  </record>
+  <record id="purchase_order_tree_enh" model="ir.ui.view">
+    <field name="name">purchase.order.tree.enh</field>
+    <field name="model">purchase.order</field>
+    <field name="inherit_id" ref="purchase.purchase_order_tree" />
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='name']" position="after">
+          <field name="partner_ref" />
+      </xpath>
+    </field>
+  </record>
+</odoo>

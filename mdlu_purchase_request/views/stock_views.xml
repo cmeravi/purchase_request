@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="mdlu_view_picking_po_form" model="ir.ui.view">
+    <field name="name">jvmf.view.picking.po</field>
+    <field name="model">stock.picking</field>
+    <field name="type">form</field>
+    <field name="inherit_id" ref="stock.view_picking_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='origin']" position="before">
+        <field name="po_id" attrs="{'invisible': [('po_id', '=', False)]}"/>
+        <field name="partner_ref" attrs="{'invisible': [('partner_ref', '=', False)]}"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>
