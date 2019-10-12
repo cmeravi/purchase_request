@@ -2,7 +2,7 @@
 {
     'name': 'Purchase Request',
     'author': 'Moddulu Solutions',
-    'version': '1.0',
+    'version': '12.0.1.0.1',
     'summary': 'This module is designed to allow employees to make request items that may require purchasing approval.',
     'images': ['static/description/banner.png',],
     'price': 30.00,
