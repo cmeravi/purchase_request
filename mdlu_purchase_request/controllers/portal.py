@@ -18,7 +18,7 @@ class CustomerPortal(CustomerPortal):
 
     def _prepare_portal_layout_values(self):
         values = super(CustomerPortal, self)._prepare_portal_layout_values()
-        values['purchase_request_count'] = request.env['purchase.request'].search_count([('state','not in', ['draft'])])
+        values['purchase_request_count'] = request.env['purchase.request'].search_count([('state','not in', ['draft']),('message_partner_ids', 'child_of', [request.env.user.partner_id.id]),])
         return values
 
     @http.route(['/my/purchase_requests', '/my/purchase_requests/page/<int:page>'], type='http', auth="user", website=True)
@@ -26,10 +26,9 @@ class CustomerPortal(CustomerPortal):
         values = self._prepare_portal_layout_values()
         partner = request.env.user.partner_id
         PurchaseRequest = request.env['purchase.request']
+        domain = [('message_partner_ids', 'child_of', [partner.id]),]
 
-        domain = []
-
-        archive_groups = self._get_archive_groups('purchase.order', domain)
+        archive_groups = self._get_archive_groups('purchase.request', domain)
         if date_begin and date_end:
             domain += [('create_date', '>', date_begin), ('create_date', '<=', date_end)]
 

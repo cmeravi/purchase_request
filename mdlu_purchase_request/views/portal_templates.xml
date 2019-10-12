@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <template id="portal_my_home_menu_purchase_requests" name="Portal layout : purchase request menu entries" inherit_id="portal.portal_breadcrumbs" priority="10">
+  <template id="portal_my_home_menu_purchase_requests" name="Portal layout : purchase_request menu entry" inherit_id="portal.portal_breadcrumbs" priority="10">
     <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
-      <li t-if="page_name == 'portal_my_purchase_request' or order" t-attf-class="breadcrumb-item #{'active ' if not purchase_request else ''}">
+      <li t-if="page_name == 'purchase_request' or purchase_request" t-attf-class="breadcrumb-item #{'active ' if not purchase_request else ''}">
         <a t-if="purchase_request" t-attf-href="/my/purchase_requests?{{ keep_query() }}">Purchase Requests</a>
         <t t-else="">Purchase Requests</t>
       </li>
       <li t-if="purchase_request" class="breadcrumb-item active">
         <t t-esc="purchase_request.name"/>
-      </li>
-      <li t-if="order" class="breadcrumb-item active">
-          <t t-esc="order.name"/>
       </li>
     </xpath>
   </template>
