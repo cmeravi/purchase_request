@@ -35,7 +35,7 @@ class PurchaseOrderLine(models.Model):
     pr_line_id = fields.Many2one('purchase.request.line')
 
 
-    @api.multi
+    
     def cancel_line_item(self):
         for line in self:
             if line.pr_line_id:

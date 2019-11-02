@@ -3,9 +3,9 @@
   <record id="mdlu_purchase_request_partner_form" model="ir.ui.view">
     <field name="name">mdlu.purchase.request.partner.form</field>
     <field name="model">res.partner</field>
-    <field name="inherit_id" ref="mdlu_purchasing_enhancements.mdlu_purchase_enhancment_partner_form"/>
+    <field name="inherit_id" ref="base.view_partner_form"/>
     <field name="arch" type="xml">
-      <xpath expr="//group[@name='additional_internal_controls']" position="inside">
+      <xpath expr="//page[@name='internal_notes']/field[@name='comment']" position="after">
         <group string="Purchase Requests" name="purchase_requests">
           <field name="purchase_request_allowed" string="Can Place Purchase Requests"/>
         </group>

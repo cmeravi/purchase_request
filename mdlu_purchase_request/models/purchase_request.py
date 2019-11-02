@@ -24,7 +24,6 @@ class PurchaseRequest(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     #Add purchase order tracking to purchase request
-    @api.multi
     def _count_pos(self):
         for req in self:
             req.po_count = len(req.po_ids)
@@ -47,7 +46,7 @@ class PurchaseRequest(models.Model):
             types = type_obj.search([('code', '=', 'incoming'),('warehouse_id', '=', False)])
         return types[:1]
 
-    @api.multi
+
     @api.depends('state')
     def _compute_is_editable(self):
         for rec in self:
@@ -55,7 +54,6 @@ class PurchaseRequest(models.Model):
                 rec.is_editable = False
             else:
                 rec.is_editable = True
-
 
     name = fields.Char('Request Reference', size=32, required=True, default=_get_default_name, track_visibility='onchange')
     origin = fields.Char('Source Document', size=32)
@@ -72,7 +70,7 @@ class PurchaseRequest(models.Model):
     po_ids = fields.Many2many('purchase.order', 'purchase_request_purchase_order_rel', 'request_id', 'po_id', string="Purchase Orders")
     po_count = fields.Integer(compute='_count_pos')
 
-    @api.multi
+
     def copy(self, default=None):
         default = dict(default or {})
         self.ensure_one()
@@ -95,7 +93,7 @@ class PurchaseRequest(models.Model):
             request.message_subscribe(partner_ids=follower_ids)
         return request
 
-    @api.multi
+
     def write(self, vals):
         res = super(PurchaseRequest, self).write(vals)
         for request in self:
@@ -111,7 +109,7 @@ class PurchaseRequest(models.Model):
         return res
 
     #define reset button
-    @api.multi
+
     def button_draft(self):
         for rec in self:
             rec.state = 'draft'
@@ -119,14 +117,14 @@ class PurchaseRequest(models.Model):
         return True
 
     #define request for approval button
-    @api.multi
+
     def button_to_approve(self):
         for rec in self:
             rec.state = 'to_approve'
         return True
 
     #define approved/ordered button this button checks state of PR line items for ordering.
-    @api.multi
+
     def button_approved(self):
         #create lists of purchase orders and po lines to return at the end of the method
         pos = self.env['purchase.order']
@@ -188,7 +186,7 @@ class PurchaseRequest(models.Model):
         return pos, po_lines
 
         #create button to view POs
-    @api.multi
+
     def action_view_po(self):
         pos = self.mapped('po_ids')
         action = self.env.ref('mdlu_purchase_request.pr_po_tree').read()[0]
@@ -202,7 +200,7 @@ class PurchaseRequest(models.Model):
         return action
 
     #create reject PR button
-    @api.multi
+
     def button_rejected(self):
         for rec in self:
             rec.state = 'rejected'
@@ -210,14 +208,14 @@ class PurchaseRequest(models.Model):
         return True
 
     #create Cancel PR button
-    @api.multi
+
     def button_cancelled(self):
         for rec in self:
             rec.state = 'cancelled'
             rec.line_ids.do_cancel()
         return True
 
-    @api.multi
+
     def check_auto_reject(self):
         """When all lines are cancelled the purchase request should be
         auto-rejected."""
@@ -231,7 +229,7 @@ class PurchaseRequestLine(models.Model):
     _description = "Purchase Request Line"
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    @api.multi
+
     @api.depends('product_id', 'name', 'product_uom_id', 'product_qty',
                  'analytic_account_id', 'date_required', 'specifications')
     def _compute_is_editable(self):
@@ -241,7 +239,7 @@ class PurchaseRequestLine(models.Model):
             else:
                 rec.is_editable = True
 
-    @api.multi
+
     @api.depends('product_id', 'name', 'product_uom_id', 'product_qty',
                  'analytic_account_id', 'date_required', 'specifications')
     def _compute_can_edit(self):
@@ -251,7 +249,7 @@ class PurchaseRequestLine(models.Model):
             else:
                 rec.can_edit = True
 
-    @api.multi
+
     @api.depends('product_id', 'name', 'product_uom_id', 'product_qty',
                  'analytic_account_id', 'date_required', 'specifications')
     def _compute_additional_approval(self):
@@ -261,7 +259,7 @@ class PurchaseRequestLine(models.Model):
             else:
                 rec.additional_approval = True
 
-    @api.multi
+
     def _compute_supplier_id(self):
         for rec in self:
             if not rec.supplier_id:
@@ -303,16 +301,16 @@ class PurchaseRequestLine(models.Model):
     product_id = fields.Many2one('product.product', 'Product', domain=[('purchase_ok', '=', True)], track_visibility='onchange', required=True)
     name = fields.Char('Description', size=256, track_visibility='onchange', required=True)
     product_uom_id = fields.Many2one('uom.uom', string='Product Unit of Measure', default=_default_product_uom, track_visibility='onchange', store=True)
-    product_qty = fields.Float('Quantity', track_visibility='onchange', digits=dp.get_precision('Product Unit of Measure'))
+    product_qty = fields.Float('Quantity', track_visibility='onchange', digits='Product Unit of Measure')
     request_id = fields.Many2one('purchase.request', 'Purchase Request', ondelete='cascade', readonly=True)
     company_id = fields.Many2one('res.company', related='request_id.company_id', string='Company', store=True, readonly=True)
     analytic_account_id = fields.Many2one('account.analytic.account', 'Analytic Account', track_visibility='onchange')
     user_id = fields.Many2one('res.users', related='request_id.user_id', string='Requested by', store=True, readonly=True)
     assigned_to = fields.Many2one('res.users', related='request_id.assigned_to', string='Assigned to', store=True, readonly=True)
     date_start = fields.Date(related='request_id.date_start', string='Request Date', readonly=True, store=True)
-    description = fields.Text(related='request_id.description', string='Description', readonly=True, store=True)
+    description = fields.Text(related='request_id.description', string='Request Description', readonly=True, store=True)
     origin = fields.Char(related='request_id.origin', size=32, string='Source Document', readonly=True, store=True)
-    date_required = fields.Date(string='Request Date', required=True, track_visibility='onchange', default=fields.Date.context_today)
+    date_required = fields.Date(string='Item Request Date', required=True, track_visibility='onchange', default=fields.Date.context_today)
     is_editable = fields.Boolean(string='Is editable', compute="_compute_is_editable", readonly=True)
     can_edit = fields.Boolean(string='Can edit', compute="_compute_can_edit", readonly=True)
     specifications = fields.Text(string='Specifications')
@@ -327,7 +325,7 @@ class PurchaseRequestLine(models.Model):
     second_approver = fields.Many2one('res.users', string='Second Approval', domain="[('share', '=', False)]")
     additional_approval = fields.Boolean(string='Needs Additional Approval', compute="_compute_additional_approval", readonly=True)
     reason = fields.Char(string="Reason Requested", required=True)
-    price_unit = fields.Float(string='Unit Price', digits=dp.get_precision('Product Price'), default=_calculate_default_price)
+    price_unit = fields.Float(string='Unit Price', digits='Product Price', default=_calculate_default_price)
 
     #Complete fields with product is entered
     @api.onchange('product_id')
@@ -338,7 +336,6 @@ class PurchaseRequestLine(models.Model):
 
 
     #Resets the vendor field to the default supplier
-    @api.multi
     def button_reset_vendor(self):
         self.vendor_id = self.supplier_id
 
@@ -357,14 +354,12 @@ class PurchaseRequestLine(models.Model):
 
 
     #define button for cancelling a pr line
-    @api.multi
     def button_cancel(self):
         for rec in self:
             rec.do_cancel()
         return True
 
     #define button for approving a pr line
-    @api.multi
     def button_approve(self):
         for rec in self:
             if rec.cancelled:
@@ -384,7 +379,6 @@ class PurchaseRequestLine(models.Model):
         return True
 
     #define button for rejecting currend PR line
-    @api.multi
     def button_rejected(self):
         for rec in self:
             rec.state = 'rejected'
@@ -392,25 +386,21 @@ class PurchaseRequestLine(models.Model):
         return True
 
     #define button for resetting unfinished PR line
-    @api.multi
     def button_reset(self):
         for rec in self:
             rec.do_uncancel()
         return True
 
-    @api.multi
     def do_cancel(self):
         """Actions to perform when cancelling a purchase request line."""
         self.write({'cancelled': True, 'state': 'cancelled'})
         if all(c == 'cancelled' for c in self.request_id.line_ids.mapped('state')):
             self.request_id.write({'state': 'cancelled',})
 
-    @api.multi
     def do_uncancel(self):
         """Actions to perform when uncancelling a purchase request line."""
         self.write({'cancelled': False, 'state': 'draft'})
 
-    @api.multi
     def write(self, vals):
         res = super(PurchaseRequestLine, self).write(vals)
         if vals.get('cancelled'):
