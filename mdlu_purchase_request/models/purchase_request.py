@@ -156,20 +156,7 @@ class PurchaseRequest(models.Model):
                     new_po_line = self.env['purchase.order.line'].search([('order_id', '=', po.id), ('product_id', '=', line.product_id.id), ('name', '=', rec.name)])
                     #if not already on the po, add the line item to the po
                     if not new_po_line:
-                        po_line_vals = {
-                            'name': rec.name,
-                            'order_id': po.id,
-                            'product_id': line.product_id.id,
-                            'product_qty': line.product_qty,
-                            'price_unit': line.product_id.price,
-                            'product_uom': line.product_id.uom_id.id,
-                            'date_planned': po.date_order,
-                            'web_address': line.web_address,
-                            'item_name': line.name,
-                            'pr_line_id': line.id,
-                            'price_unit': line.price_unit,
-
-                        }
+                        po_line_vals = line.get_po_vals(po)
                         new_po_line = self.env['purchase.order.line'].create(po_line_vals)
                         po_lines |= new_po_line
                     #Change the Line state to Ordered which is a finished state.
@@ -206,7 +193,7 @@ class PurchaseRequest(models.Model):
     def button_rejected(self):
         for rec in self:
             rec.state = 'rejected'
-            rec.line_ids.do_cancel()
+            rec.line_ids.button_rejected()
         return True
 
     #create Cancel PR button
@@ -417,3 +404,18 @@ class PurchaseRequestLine(models.Model):
             requests = self.mapped('request_id')
             requests.check_auto_reject()
         return res
+
+    def get_po_vals(self, po):
+        return {
+            'name': self.name,
+            'order_id': po.id,
+            'product_id': self.product_id.id,
+            'product_qty': self.product_qty,
+            'price_unit': self.product_id.price,
+            'product_uom': self.product_id.uom_id.id,
+            'date_planned': po.date_order,
+            'web_address': self.web_address,
+            'item_name': self.name,
+            'pr_line_id': self.id,
+            'price_unit': self.price_unit,
+        }

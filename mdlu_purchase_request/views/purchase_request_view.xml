@@ -165,7 +165,7 @@
                                               <field name="analytic_account_id"
                                                      groups="analytic.group_analytic_accounting"
                                                      attrs="{'readonly': [('is_editable','=', False)]}"/>
-                                              <field name="web_address" widget="url" placeholder="e.g. https://www.modfuelwholesale.com"/>
+                                              <field name="web_address" widget="url" placeholder="e.g. https://www.moddulu.com"/>
                                             </group>
                                         </group>
                                         <group>
@@ -413,7 +413,7 @@
                                 <field name="analytic_account_id"
                                      groups="analytic.group_analytic_accounting"
                                      attrs="{'readonly': [('is_editable','=', False)]}"/>
-                                <field name="web_address" widget="url" placeholder="e.g. https://www.modfuelwholesale.com"/>
+                                <field name="web_address" widget="url" placeholder="e.g. https://www.moddulu.com"/>
                               </group>
                         </group>
                         <group>
@@ -508,6 +508,14 @@
             <field name="search_view_id" ref="purchase_request_line_search"/>
         </record>
 
+        <record id="purchase_request_action" model="ir.actions.act_window">
+            <field name="name">Purchase Request</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.request</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="purchase_request_line_search"/>
+        </record>
 
         <record id="purchase_request_line_approval_action_tree"
                 model="ir.actions.act_window.view">

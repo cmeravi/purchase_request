@@ -9,12 +9,14 @@
       <xpath expr="//div[hasclass('settings')]" position="inside">
         <div class="app_settings_block" data-string="Purchase Request" string="Purchase Request" data-key="mdlu_purchase_request" groups="mdlu_purchase_request.group_purchase_request_manager">
           <h2>Purchase Request Settings</h2>
-          <div class="col-12 col-lg-12 o_setting_box" >
-            <div class="o_setting_right_pane">
-              <span class="o_form_label">Purchase Request Company Abbreviation</span>
-              <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." aria-label="Values set here are company-specific." groups="base.group_multi_company" role="img"/>
-              <div>
-                Abbreviation: <field name="pr_seq_abbr" class="oe_inline"/>
+          <div class="row mt16 o_settings_container">
+            <div class="col-12 col-lg-12 o_setting_box" >
+              <div class="o_setting_right_pane">
+                <span class="o_form_label">Purchase Request Company Abbreviation</span>
+                <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." aria-label="Values set here are company-specific." groups="base.group_multi_company" role="img"/>
+                <div>
+                  Abbreviation: <field name="pr_seq_abbr" class="oe_inline"/>
+                </div>
               </div>
             </div>
           </div>

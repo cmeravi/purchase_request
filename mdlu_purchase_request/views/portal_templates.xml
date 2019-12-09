@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <template id="portal_my_home_menu_purchase_requests" name="Portal layout : purchase_request menu entry" inherit_id="portal.portal_breadcrumbs" priority="10">
+  <template id="portal_my_home_menu_purchase_requests" name="Portal layout : purchase request menu entries" inherit_id="portal.portal_breadcrumbs" priority="10">
     <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
-      <li t-if="page_name == 'purchase_request' or purchase_request" t-attf-class="breadcrumb-item #{'active ' if not purchase_request else ''}">
+      <li t-if="page_name == 'Purchase Requests' or purchase_request" t-attf-class="breadcrumb-item #{'active ' if not purchase_request else ''}">
         <a t-if="purchase_request" t-attf-href="/my/purchase_requests?{{ keep_query() }}">Purchase Requests</a>
         <t t-else="">Purchase Requests</t>
       </li>
@@ -29,10 +29,10 @@
       <t t-call="portal.portal_searchbar">
         <t t-set="title">Purchase Requests</t>
       </t>
-      <t t-if="not orders">
+      <t t-if="not purchase_requests">
         <p>You don't have any purchase requests yet.</p>
       </t>
-      <t t-if="orders" t-call="portal.portal_table">
+      <t t-if="purchase_requests" t-call="portal.portal_table">
         <thead>
           <tr class="active">
             <th>Purchase Request #</th>
@@ -41,7 +41,7 @@
           </tr>
         </thead>
         <tbody>
-          <t t-foreach="orders" t-as="order">
+          <t t-foreach="purchase_requests" t-as="order">
             <tr>
               <td><a t-attf-href="/my/purchase_requests/#{order.id}?#{keep_query()}"><t t-esc="order.name"/></a></td>
               <td><span t-field="order.date_start"/></td>

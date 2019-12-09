@@ -18,7 +18,7 @@ class CustomerPortal(CustomerPortal):
 
     def _prepare_portal_layout_values(self):
         values = super(CustomerPortal, self)._prepare_portal_layout_values()
-        values['purchase_request_count'] = request.env['purchase.request'].search_count([('state','not in', ['draft']),('message_partner_ids', 'child_of', [request.env.user.partner_id.id]),])
+        values['purchase_request_count'] = request.env['purchase.request'].search_count([('state','not in', ['draft'])])
         return values
 
     @http.route(['/my/purchase_requests', '/my/purchase_requests/page/<int:page>'], type='http', auth="user", website=True)
@@ -26,9 +26,10 @@ class CustomerPortal(CustomerPortal):
         values = self._prepare_portal_layout_values()
         partner = request.env.user.partner_id
         PurchaseRequest = request.env['purchase.request']
-        domain = [('message_partner_ids', 'child_of', [partner.id]),]
 
-        archive_groups = self._get_archive_groups('purchase.request', domain)
+        domain = []
+
+        archive_groups = self._get_archive_groups('purchase.order', domain)
         if date_begin and date_end:
             domain += [('create_date', '>', date_begin), ('create_date', '<=', date_end)]
 
@@ -76,8 +77,8 @@ class CustomerPortal(CustomerPortal):
         request.session['my_purchases_request_history'] = orders.ids[:100]
 
         values.update({
-            'orders': orders,
-            'page_name': 'purchase_request',
+            'purchase_requests': orders,
+            'page_name': 'Purchase Requests',
             'pager': pager,
             'archive_groups': archive_groups,
             'searchbar_sortings': searchbar_sortings,
