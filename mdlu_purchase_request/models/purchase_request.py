@@ -73,6 +73,7 @@ class PurchaseRequest(models.Model):
     po_count = fields.Integer(compute='_count_pos')
 
     @api.multi
+    @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         default = dict(default or {})
         self.ensure_one()
@@ -80,7 +81,11 @@ class PurchaseRequest(models.Model):
             'state': 'draft',
             'name': self._get_default_name(),
         })
-        return super(PurchaseRequest, self).copy(default)
+        rec = super(PurchaseRequest, self).copy(default)
+        for line in self.line_ids:
+            line.copy()
+            line.request_id = rec
+        return rec
 
     @api.model
     def create(self, vals):
@@ -136,7 +141,7 @@ class PurchaseRequest(models.Model):
                 #check each line for individaul line approval
                 if line.state == 'approved':
                     #check to see if there is already an open PO for the related vendor
-                    po = self.env['purchase.order'].search([('state', '=', 'draft'),('partner_id', '=', line.vendor_id.id), ('partner_ref', '=', False)])
+                    po = self.env['purchase.order'].search([('state', '=', 'draft'),('partner_id', '=', line.vendor_id.id), ('partner_ref', '=', False)], limit=1)
                     #if there isn't an open PO for the related vendor, create a new PO
                     if not po:
                         po_vals = {
@@ -148,9 +153,11 @@ class PurchaseRequest(models.Model):
                         po = self.env['purchase.order'].create(po_vals)
                     else:
                         #if there is an open po, append the origin with the current PR name
-                        po_origins = po.origin.split(',')
-                        if rec.name not in po_origins:
+                        po_origins = po.origin.split(',') if po.origin else False
+                        if po_origins and rec.name not in po_origins:
                             po.origin = po.origin + ", " + rec.name
+                        else:
+                            po.origin = rec.name
 
                     #Look to see if the line item is already on the PO
                     new_po_line = self.env['purchase.order.line'].search([('order_id', '=', po.id), ('product_id', '=', line.product_id.id), ('name', '=', rec.name)])
@@ -297,9 +304,9 @@ class PurchaseRequestLine(models.Model):
     user_id = fields.Many2one('res.users', related='request_id.user_id', string='Requested by', store=True, readonly=True)
     assigned_to = fields.Many2one('res.users', related='request_id.assigned_to', string='Assigned to', store=True, readonly=True)
     date_start = fields.Date(related='request_id.date_start', string='Request Date', readonly=True, store=True)
-    description = fields.Text(related='request_id.description', string='Description', readonly=True, store=True)
+    description = fields.Text(related='request_id.description', string='Request Description', readonly=True, store=True)
     origin = fields.Char(related='request_id.origin', size=32, string='Source Document', readonly=True, store=True)
-    date_required = fields.Date(string='Request Date', required=True, track_visibility='onchange', default=fields.Date.context_today)
+    date_required = fields.Date(string='Required by Date', required=True, track_visibility='onchange', default=fields.Date.context_today)
     is_editable = fields.Boolean(string='Is editable', compute="_compute_is_editable", readonly=True)
     can_edit = fields.Boolean(string='Can edit', compute="_compute_can_edit", readonly=True)
     specifications = fields.Text(string='Specifications')

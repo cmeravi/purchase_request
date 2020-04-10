@@ -297,7 +297,7 @@
                     <field name="product_id"/>
                     <field name="name"/>
                     <field name="product_qty"/>
-                    <field name="product_uom_id" groups="product.group_uom"/>
+                    <field name="product_uom_id" groups="uom.group_uom"/>
                     <field name="analytic_account_id"
                            groups="analytic.group_analytic_accounting"/>
                     <field name="vendor_id"/>
@@ -321,7 +321,7 @@
                     <field name="product_id"/>
                     <field name="name"/>
                     <field name="product_qty"/>
-                    <field name="product_uom_id" groups="product.group_uom"/>
+                    <field name="product_uom_id" groups="uom.group_uom"/>
                     <field name="analytic_account_id"
                            groups="analytic.group_analytic_accounting"/>
                     <field name="vendor_id"/>
@@ -390,7 +390,7 @@
                                            class="oe_inline"
                                            attrs="{'readonly': [('is_editable','=', False)]}"/>
                                     <field name="product_uom_id"
-                                           groups="product.group_uom"
+                                           groups="uom.group_uom"
                                            class="oe_inline"
                                            attrs="{'readonly': [('is_editable','=', False)]}"/>
                                 </div>
