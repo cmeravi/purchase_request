@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record model="ir.ui.view" id="mdlu_asset_manager_department_form">
+      <field name="name">mdlu.asset.manager.department.form</field>
+      <field name="model">hr.department</field>
+      <field name="inherit_id" ref="hr.view_department_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='company_id']" position="after">
+          <field name="equipment_manager_ids" widget="many2many_tags"/>
+        </xpath>
+      </field>
+  </record>
+</odoo>

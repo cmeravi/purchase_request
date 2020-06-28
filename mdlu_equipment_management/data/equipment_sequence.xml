@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo noupdate="1">
+        <record id="mdlu_seq_equipment_loan" model="ir.sequence">
+            <field name="name">Equipment Loan</field>
+            <field name="code">equipment.loan</field>
+            <field name="prefix">EL-</field>
+            <field name="padding">6</field>
+        </record>
+
+        <record id="mdlu_seq_equipment_request" model="ir.sequence">
+            <field name="name">Equipment Request</field>
+            <field name="code">equipment.request</field>
+            <field name="prefix">ER-</field>
+            <field name="padding">6</field>
+        </record>
+
+</odoo>

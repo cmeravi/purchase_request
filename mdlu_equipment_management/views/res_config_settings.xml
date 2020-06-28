@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Add in configuration items -->
+  <record id="res_config_equipment_management_settings_view_form" model="ir.ui.view">
+    <field name="name">res.config.product.return.settings.view.form</field>
+    <field name="model">res.config.settings</field>
+    <field name="inherit_id" ref="base.res_config_settings_view_form" />
+    <field name="arch" type="xml">
+      <xpath expr="//div[hasclass('settings')]" position="inside">
+        <div class="app_settings_block" data-string="Equipment Management" string="Equipment Management" data-key="mdlu_equipment_management" groups="mdlu_equipment_management.group_equipment_management_manager">
+          <h2>Equipment Request</h2>
+          <div class="row mt16 o_settings_container">
+            <div class="col-12 col-lg-12 o_setting_box" >
+              <div class="o_setting_right_pane">
+                <span class="o_form_label">Default Equipment Manager</span>
+                <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." aria-label="Values set here are company-specific." groups="base.group_multi_company" role="img"/>
+                <div>
+                  <field name="equipment_manager" class="oe_inline"/>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-lg-12 o_setting_box" >
+              <div class="o_setting_right_pane">
+                <span class="o_form_label">Initial Check Out</span>
+                <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." aria-label="Values set here are company-specific." groups="base.group_multi_company" role="img"/>
+                <div>
+                  <field name="equipment_checkout" class="oe_inline"/>
+                  <label for="equipment_checkout" class="oe_inline" string=" days"/>
+                </div>
+              </div>
+              <div class="o_setting_right_pane">
+                <span class="o_form_label">Renewal Period</span>
+                <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." aria-label="Values set here are company-specific." groups="base.group_multi_company" role="img"/>
+                <div>
+                  <field name="equipment_renewal" class="oe_inline"/>
+                  <label for="equipment_renewal" class="oe_inline" string=" days"/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="action_em_configuration" model="ir.actions.act_window">
+      <field name="name">Settings</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">res.config.settings</field>
+      <field name="view_mode">form</field>
+      <field name="target">inline</field>
+      <field name="context">{'module' : 'mdlu_equipment_management'}</field>
+  </record>
+
+  <menuitem id="menu_er_global_settings"
+      name="Settings"
+      parent="menu_equipment_request_root"
+      action="action_em_configuration"
+      sequence="200"
+      groups="group_equipment_management_manager"/>
+
+
+  <menuitem id="menu_el_global_settings"
+      name="Settings"
+      parent="menu_equipment_loan_management_root"
+      action="action_em_configuration"
+      sequence="200"
+      groups="group_equipment_management_manager"/>
+</odoo>

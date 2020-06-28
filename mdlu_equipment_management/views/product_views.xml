@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="mdlu_equipment_loan_product_template_form" model="ir.ui.view">
+    <field name="name">mdlu.equipment.loan.product.template.form</field>
+    <field name="model">product.template</field>
+    <field name="inherit_id" ref="product.product_template_form_view"/>
+    <field name="arch" type="xml">
+
+      <xpath expr="//div[@name='options']" position="inside">
+        <div name="equipment_loan">
+          <field name="equipment_loan_ok" nolabel="1"/>
+          <label for="equipment_loan_ok"/>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="mdlu_equipment_loan_product_variant_form" model="ir.ui.view">
+    <field name="name">mdlu.equipment.loan.product.variant.form</field>
+    <field name="model">product.product</field>
+    <field name="inherit_id" ref="product.product_normal_form_view"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='barcode']" position="after">
+        <field name="equipment_loan_ok" invisible="1"/>
+        <field name="equipment_category" placeholder="Loan Category" attrs="{'invisible': [('equipment_loan_ok','=',False)], 'required': [('equipment_loan_ok','=',True)]}"/>
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Equipment Request Breadcrumb Controller -->
+  <template id="portal_my_home_equipment_requests" name="Portal Layout : equipment request menu entries" inherit_id="portal.portal_breadcrumbs" priority="10">
+    <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+      <li t-if="page_name == 'Equipment Requests' or equipment_request" t-attf-class="breadcrumb-item #{'active ' if not equipment_request else ''}">
+        <a t-if="equipment_request" t-attf-href="/my/equipment_requests?{{ keep_query() }}">Equipment Requests</a>
+        <t t-else="">Equipment Requests</t>
+      </li>
+      <li t-if="equipment_request" class="breadcrumb-item active">
+        <t t-esc="equipment_request.name"/>
+      </li>
+    </xpath>
+  </template>
+
+  <!-- Equipment Request main menu item -->
+  <template id="portal_my_home_equipment_request" name="Portal My Home : equipment request" inherit_id="portal.portal_my_home" priority="25">
+    <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+        <t t-if="env.user.partner_id.equipment_loan_allowed" t-call="portal.portal_docs_entry">
+            <t t-set="title">Equipment Requests</t>
+            <t t-set="url" t-value="'/my/equipment_requests'"/>
+            <t t-set="count" t-value="equipment_request_count"/>
+        </t>
+    </xpath>
+  </template>
+
+  <!-- Equipment Requsts List -->
+  <template id="portal_my_equipment_requests" name="Portal: My Equipment Requests">
+    <t t-call="portal.portal_layout">
+      <t t-set="breadcrumbs_searchbar" t-value="True"/>
+      <t t-call="portal.portal_searchbar">
+        <t t-set="title">Equipment Requests</t>
+      </t>
+      <t>
+        <!-- New Equipment Request Button -->
+        <a role="button" class="mt8 btn btn-secondary btn-block" t-attf-href="/my/equipment_requests/new">New Equipment Request</a>
+      </t>
+      <t t-if="not requests">
+      </t>
+      <t t-if="requests" t-call="portal.portal_table">
+        <thead>
+          <tr class="active">
+            <th>Equipment Request #</th>
+            <th>Date Requested</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <t t-foreach="requests" t-as="request">
+            <tr>
+              <td><a t-attf-href="/my/equipment_requests/#{request.id}?#{keep_query()}"><span t-field="request.name"/></a></td>
+              <td><span t-field="request.request_date"/></td>
+              <td>
+                <t t-if="request.state == 'draft'">
+                  <span class="badge badge-pill badge-info"><i class="fa fa-fw fa-file-text"/> New</span>
+                </t>
+                <t t-if="request.state in ['needs_approval','partial_approved']">
+                  <span class="badge badge-pill badge-secondary"><i class="fa fa-fw fa-file-text"/> Needs Approval</span>
+                </t>
+                <t t-if="request.state == 'approved'">
+                  <span class="badge badge-pill badge-success"><i class="fa fa-fw fa-file-text"/> Approved</span>
+                </t>
+                <t t-if="request.state == 'cancelled'">
+                  <span class="badge badge-pill badge-warning"><i class="fa fa-fw fa-remove"/> Cancelled</span>
+                </t>
+                <t t-if="request.state == 'rejected'">
+                  <span class="badge badge-pill badge-warning"><i class="fa fa-fw fa-remove"/> Rejected</span>
+                </t>
+              </td>
+            </tr>
+          </t>
+        </tbody>
+      </t>
+    </t>
+  </template>
+
+  <!-- Equipment Request Page -->
+  <template id="portal_my_equipment_request" name="Portal: My Equipment Request" inherit_id="portal.portal_sidebar" primary="True">
+    <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
+      <div class="row mt16 oe_website_contract o_portal_sidebar">
+
+        <!-- ====== Sidebar  ====== -->
+        <t t-call="portal.portal_record_sidebar">
+          <t t-set="classes" t-value="'col-lg-auto d-print-none'"/>
+
+          <t t-set="entries">
+            <ul class="list-group list-group-flush flex-wrap flex-row flex-lg-column">
+              <li t-if="equipment_request.assigned_to" class="list-group-item flex-grow-1">
+                <div class="small mb-1"><strong class="text-muted">Approver:</strong></div>
+                <div class="row flex-nowrap">
+                  <div class="col flex-grow-0 pr-2">
+                    <img class="rounded-circle mr4 float-left o_portal_contact_img" t-if="equipment_request.assigned_to.image" t-attf-src="data:image/png;base64,#{equipment_request.assigned_to.image}" alt="Contact"/>
+                    <img class="rounded-circle mr4 float-left o_portal_contact_img" t-if="not equipment_request.assigned_to.image" src="/web/static/src/img/placeholder.png" alt="Contact"/>
+                  </div>
+                  <div class="col pl-0" style="min-width: 150px">
+                    <span t-field="equipment_request.assigned_to" t-options='{"widget": "contact", "fields": ["name", "phone"], "no_marker": True}'/>
+                    <a t-if="equipment_request.assigned_to.email" t-attf-href="mailto:{{equipment_request.assigned_to.email}}" class="small"><i class="fa fa-envelope"></i> Send email</a>
+                  </div>
+                </div>
+              </li>
+              <li class="list-group-item flex-grow-1" t-if="equipment_request.state != 'draft'">
+                <!-- New Request Button -->
+                <a role="button" class="mt8 btn btn-secondary btn-block" t-attf-href="/my/equipment_requests/new">New Equipment Request</a>
+              </li>
+              <li class="list-group-item flex-grow-1" t-if="equipment_request.state == 'draft'">
+                <!-- New Request Button -->
+                <a  role="button" class="mt8 btn btn-secondary btn-block" t-attf-href="/my/equipment_requests/#{equipment_request.id}/submit">Submit Request</a>
+              </li>
+            </ul>
+          </t>
+        </t>
+
+        <!-- ====== Page Content  ====== -->
+        <div id="equipment_request_content" class="col-12 col-lg justify-content-end">
+          <div class="card oe_website_contract">
+            <div class="card-header bg-white pb-2 pt-3">
+              <div class="row">
+                <div class="col-12 col-lg flex-grow-1 mb-1 mb-lg-0">
+                  <h4 class="mb-0"><small class="text-muted">Equipment Request -</small> <span t-field="equipment_request.display_name"/></h4>
+                </div>
+                <div class="col-12 col-lg flex-grow-0 text-lg-right mb-1 mb-lg-0">
+                  <span t-if="equipment_request.state == 'draft'" class="badge badge-pill badge-info"><i class="fa fa-fw fa-file-text"/> New</span>
+                  <span t-if="equipment_request.state in ['needs_approval','partial_approved']" class="badge badge-pill badge-secondary"><i class="fa fa-fw fa-file-text"/> Needs Approval</span>
+                  <span t-if="equipment_request.state == 'approved'" class="badge badge-pill badge-success"><i class="fa fa-fw fa-remove"/> Approved</span>
+                  <span t-if="equipment_request.state == 'cancelled'" class="badge badge-pill badge-warning"><i class="fa fa-fw fa-remove"/> Cancelled</span>
+                  <span t-if="equipment_request.state == 'rejected'" class="badge badge-pill badge-warning"><i class="fa fa-fw fa-remove"/> Rejected</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div t-if="message" t-att-class="'alert ' + message_class" role="alert">
+                  <p t-esc="message"/>
+              </div>
+              <div class="row mt-4">
+                <div class="col-12 col-lg-5  mb-3 mb-lg-0">
+                  <table class="table table-borderless table-sm">
+                    <tbody style="white-space:nowrap">
+                      <tr>
+                        <th class="text-right">Request Date:</th>
+                        <td class="w-100"><span t-field="equipment_request.request_date"/></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="col-12 col-lg-5 offset-lg-1">
+                </div>
+              </div>
+              <!-- Request Lines -->
+              <div class="row">
+                <div class="col-12 mt-4">
+                  <h5 class="mb-1">Requested Items</h5>
+                  <table class="table table-sm table-responsive-lg" id="wc-equipment-request-table">
+                    <thead>
+                      <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Unit of Measure</th>
+                        <th>Unit Price</th>
+                        <th>Vendor</th>
+                        <th>Loan Type</th>
+                        <th t-if="equipment_request.state != 'draft'">PR Status</th>
+                        <th t-if="equipment_request.state != 'draft'">Loans</th>
+                        <th>Status</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <div t-foreach="equipment_request.request_line_ids" t-as="line">
+                        <tr>
+                          <td class="line-description"><span t-field="line.product_id.name"/></td>
+                          <td class="line-description"><span t-field="line.product_qty"/></td>
+                          <td class="line-description"><span t-field="line.product_uom_id.name"/></td>
+                          <td class="line-description"><span t-esc="line.price_unit"/></td>
+                          <td class="line-description"><span t-field="line.vendor_id.name"/></td>
+                          <td class="line-description"><span t-field="line.type"/></td>
+                          <td t-if="equipment_request.state != 'draft'" class="line-description"><a t-attf-href="/my/purchase_requests/#{line.purchase_request_id.id}?#{keep_query()}" title="View Purchase Request"><span t-field="line.purchase_request_id.state"/></a></td>
+                          <td t-if="equipment_request.state != 'draft'" class="line-description"><a t-attf-href="/my/loaned_equipment/request_line=#{line.id}?#{keep_query()}" t-if="line.loan_line_ids">View Loans</a></td>
+                          <td class="line-description"><span t-field="line.state"/></td>
+                          <td class="line-description" t-if="line.request_state not in ['approved','cancelled','rejected']">
+                            <a role="button" t-if="line.state in ['draft','needs_approval','approved']" t-attf-href="/my/equipment_requests/#{equipment_request.id}/request_line=#{line.id}/cancel" title="Cancel"><i class="fa fa-fw fa-ban" style="color:red;"/></a>
+                          </td>
+                        </tr>
+                      </div>
+                    </tbody>
+                    <tfoot t-if="equipment_request.state == 'draft'">
+                      <tr>
+                        <td>
+                          <!-- Add new line to draft request -->
+                          <a data-toggle="modal" data-target="#wc-modal-new_line" href="#">Add New Line</a>
+                        </td>
+                        <td colspan="10">
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- chatter -->
+          <div id="equipment_request_communication" class="mt-4">
+            <h2>Communication</h2>
+            <t t-call="portal.message_thread">
+              <t t-set="object" t-value="equipment_request"/>
+            </t>
+          </div>
+        </div>
+
+        <!-- Modal to add items to loan -->
+        <div role="dialog" class="modal fade" id="wc-modal-new_line" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <header class="modal-header">
+                <h4 class="modal-title">Add Item</h4>
+              </header>
+              <form method="post" t-attf-action="/my/equipment_requests/#{equipment_request.id}/new_line">
+                <input class="d-none" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <main class="modal-body">
+                  <div class="form-group">
+                    <table border="0">
+                      <tr>
+                        <td><label for="type">Loan Type </label></td>
+                        <td>
+                          <select name="type">
+                            <option value="long">Long Term</option>
+                            <option value="short">Short Term</option>
+                          </select>
+                        </td>
+                        <td><label for="vendor_id">Vendor </label></td>
+                        <td>
+                          <select name="vendor_id">
+                            <t t-foreach="vendors" t-as="vendor">
+                              <option t-attf-value="#{vendor.id}"><span t-field="vendor.name"/></option>
+                            </t>
+                          </select>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><label for="product_id">Product </label></td>
+                        <td>
+                          <select type="selection" name="product_id">
+                            <t t-foreach="products" t-as="product">
+                              <option t-attf-value="#{product.id}"><span t-field="product.display_name"/></option>
+                            </t>
+                          </select>
+                        </td>
+                        <td><label for="name">Description * </label></td>
+                        <td><input type="text" name="name" id="description" required="required"/></td>
+                      </tr>
+                      <tr>
+                        <td><label for="product_qty">Quantity * </label></td>
+                        <td><input type="number" name="product_qty" id="product_qty" required="required"/></td>
+                        <td><label for="price_unit">Unit Price *</label></td>
+                        <td><input type="number" name="price_unit" id="price_unit" required="required"/></td>
+                      </tr>
+                      <tr>
+                        <td><label for="reason">Reason * </label></td>
+                        <td><input type="text" name="reason" id="reason" required="required"/></td>
+                        <td><label for="web_address">Web Address </label></td>
+                        <td><input type="text" name="web_address" placeholder="https://www.moddulu.com"/></td>
+                      </tr>
+                    </table>
+                  </div>
+                </main>
+                <footer class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-primary contract-submit">Add Item</button>
+                </footer>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </xpath>
+  </template>
+
+  <!-- Equipment Loan Breadcrumb Controller -->
+  <template id="portal_my_home_equipment_loan" name="Portal Layout : equipment loan menu entries" inherit_id="portal.portal_breadcrumbs" priority="10">
+    <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+      <li t-if="request_id" t-attf-class="breadcrumb-item #{'active ' if not request_id else ''}">
+        <a t-if="request_id" t-attf-href="/my/equipment_requests?{{ keep_query() }}">Equipment Requests</a>
+      </li>
+      <li t-if="request_id" t-attf-class="breadcrumb-item #{'active ' if not request_id else ''}">
+        <a t-if="request_id" t-attf-href="/my/equipment_requests/#{request_id.id}? {{ keep_query() }}"><t t-esc="request_id.name"/></a>
+      </li>
+      <li t-if="page_name == 'Loaned Equipment' or request_line" class="breadcrumb-item active">
+        Loaned Equpment
+      </li>
+    </xpath>
+  </template>
+
+  <!-- Equipment Loan main menu item -->
+  <template id="portal_my_home_loaned_equipment" name="Portal My Home : loaned equipment" inherit_id="portal.portal_my_home" priority="25">
+    <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+        <t t-if="env.user.partner_id.equipment_loan_allowed" t-call="portal.portal_docs_entry">
+            <t t-set="title">Loaned Equipment</t>
+            <t t-set="url" t-value="'/my/loaned_equipment'"/>
+            <t t-set="count" t-value="loaned_equipment_count"/>
+        </t>
+    </xpath>
+  </template>
+
+  <!-- Equipment Loan List -->
+  <template id="portal_my_loaned_equipment" name="Portal: My Loaned Equipment">
+    <t t-call="portal.portal_layout">
+      <t t-set="breadcrumbs_searchbar" t-value="True"/>
+      <t t-call="portal.portal_searchbar">
+        <t t-set="title">Loaned Equipment</t>
+      </t>
+      <t t-if="not loans">
+      </t>
+      <t t-if="loans" t-call="portal.portal_table">
+        <thead>
+          <tr class="active">
+            <th>Item</th>
+            <th>Accessories</th>
+            <th>Loan Type</th>
+            <th>Date Checkted Out</th>
+            <th>Due Date</th>
+            <th>Loan Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <t t-foreach="loans" t-as="loan">
+            <tr>
+              <td><span t-field="loan.item_id.name"/></td>
+              <td><span t-field="loan.accessory_ids"/></td>
+              <td><span t-field="loan.loan_type"/></td>
+              <td><span t-field="loan.date_out"/></td>
+              <td><span t-field="loan.due_date"/></td>
+              <td>
+                <t t-if="loan.state == 'new'">
+                  <span class="badge badge-pill badge-info"><i class="fa fa-fw fa-file-text"/> New</span>
+                </t>
+                <t t-if="loan.state in ['needs_approval']">
+                  <span class="badge badge-pill badge-secondary"><i class="fa fa-fw fa-file-text"/> Needs Approval</span>
+                </t>
+                <t t-if="loan.state in ['renew']">
+                  <span class="badge badge-pill badge-secondary"><i class="fa fa-fw fa-file-text"/> Renew Requested</span>
+                </t>
+                <t t-if="loan.state == 'approved'">
+                  <span class="badge badge-pill badge-primary"><i class="fa fa-fw fa-remove"/> Approved</span>
+                </t>
+                <t t-if="loan.state == 'checked_out'">
+                  <span class="badge badge-pill badge-success"><i class="fa fa-fw fa-remove"/> Checked Out</span>
+                </t>
+                <t t-if="loan.state == 'over_due'">
+                  <span class="badge badge-pill badge-danger"><i class="fa fa-fw fa-remove"/> Over Due</span>
+                </t>
+                <t t-if="loan.state == 'cancelled'">
+                  <span class="badge badge-pill badge-warning"><i class="fa fa-fw fa-remove"/> Cancelled</span>
+                </t>
+                <t t-if="loan.state == 'returned'">
+                  <span class="badge badge-pill badge-success"><i class="fa fa-fw fa-remove"/> Returned</span>
+                </t>
+              </td>
+              <td><a t-if="loan.loan_type == 'short' and loan.state in ['checked_out','due_soon','over_due']" role="button" class="badge badge-pill badge-info" t-attf-href="/my/loaned_equipment/#{loan.id}/renew">Renew</a></td>
+            </tr>
+          </t>
+        </tbody>
+      </t>
+    </t>
+  </template>
+
+</odoo>

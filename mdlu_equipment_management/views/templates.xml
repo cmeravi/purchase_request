@@ -1,0 +1,13 @@
+<odoo>
+    <template id="assets_backend" inherit_id="website.assets_backend" name="Equipment Request Back Assets">
+        <xpath expr="." postion="inside">
+            <link rel="stylesheet" type="text/css" href="/mdlu_equipment_management/static/src/css/equipment_loan_styles.scss"/>
+        </xpath>
+    </template>
+    <template id="assets_frontend" inherit_id="web.assets_frontend" name="Equipment Request Front Assets">
+          <xpath expr="/t" position="inside">
+            <link rel="stylesheet" type="text/css" href="/mdlu_equipment_management/static/src/css/equipment_request.css"/>
+            <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+          </xpath>
+      </template>
+</odoo>

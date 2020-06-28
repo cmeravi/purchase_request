@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data noupdate="0">
+    <record model="ir.module.category" id="module_category_equipment_management">
+        <field name="name">Equipment Management</field>
+        <field name="parent_id" ref="base.module_category_accounting_and_finance"/>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="group_equipment_management_user" model="res.groups">
+      <field name="name">User</field>
+      <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+      <field name="category_id" ref="module_category_equipment_management"/>
+    </record>
+
+    <record id="group_equipment_management_manager" model="res.groups">
+      <field name="name">Manager</field>
+      <field name="implied_ids" eval="[(4, ref('group_equipment_management_user'))]"/>
+      <field name="category_id" ref="module_category_equipment_management"/>
+    </record>
+
+
+  </data>
+</odoo>

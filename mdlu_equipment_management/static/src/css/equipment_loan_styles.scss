@@ -1,0 +1,12 @@
+#oe_equipment_loan_status {
+    color: $o-brand-secondary;
+    &.oe_equipment_loan_status_green {
+        color: theme-color('success');
+    }
+    &.oe_equipment_loan_status_red {
+        color: theme-color('danger');
+    }
+    &.oe_equipment_loan_status_yellow {
+        color: theme-color('warning');
+    }
+}

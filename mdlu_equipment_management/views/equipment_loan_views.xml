@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- explicit list view definition -->
+
+    <record model="ir.ui.view" id="mdlu_equipment_loan_management_list">
+      <field name="name">Equipment Loan</field>
+      <field name="model">equipment.loan</field>
+      <field name="arch" type="xml">
+        <tree decoration-muted="state in ('returned','cancelled','rejected')"
+              decoration-success="state in ('checked_out')"
+              decoration-warning="over_due_warning"
+              decoration-danger="state in ('over_due')"
+              decoration-info="renew_request"
+              string="Equipment Loan">
+          <field name="name"/>
+          <field name="user_id"/>
+          <field name="check_out"/>
+          <field name="check_in"/>
+          <field name="due_date"/>
+          <field name="type"/>
+          <field name="state"/>
+          <field name="over_due_warning" invisible="1"/>
+          <field name="renew_request" invisible="1"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="mdlu_equipment_loan_management_form_view" model="ir.ui.view">
+      <field name="name">Equipment Loan</field>
+      <field name="model">equipment.loan</field>
+      <field name="arch" type="xml">
+        <form>
+          <header>
+            <button name="button_to_approve" states="new"
+                    string="Request approval" type="object"
+                    class="oe_highlight"/>
+
+            <button name="button_approve"
+                    states="needs_approval"
+                    string="Approve"
+                    type="object"
+                    class="oe_highlight"
+                    groups="mdlu_equipment_management.group_equipment_management_manager"/>
+
+            <button name="button_reject"
+                    states="needs_approval"
+                    string="Reject"
+                    type="object"
+                    groups="mdlu_equipment_management.group_equipment_management_manager"/>
+
+            <button name="button_check_out"
+                    states="approved"
+                    string="Check Out"
+                    type="object"
+                    class="oe_highlight"
+                    groups="mdlu_equipment_management.group_equipment_management_manager"/>
+
+            <button name="button_renew"
+                    states="checked_out,over_due"
+                    string="Renew"
+                    type="object"
+                    class="oe_highlight"
+                    groups="mdlu_equipment_management.group_equipment_management_manager"/>
+
+            <button name="button_check_in"
+                    states="checked_out,over_due"
+                    string="Check In"
+                    type="object"
+                    class="oe_highlight"
+                    groups="mdlu_equipment_management.group_equipment_management_manager"/>
+
+            <button name="button_reset"
+                    states="needs_approval,approved,rejected"
+                    string="Reset"
+                    type="object"
+                    groups="mdlu_equipment_management.group_equipment_management_manager"/>
+
+            <button name="button_cancelled"
+                    states="new,needs_approval,approved"
+                    string="Cancel" type="object"/>
+            <field name="state" widget="statusbar"
+                   statusbar_visible="new,approved,checked_out,returned"
+                   statusbar_colors='{"approved":"blue"}'/>
+          </header>
+          <sheet>
+            <h2>
+              <field name="name" attrs="{'readonly': [('state', '!=', 'new')]}"/>
+            </h2>
+            <group>
+              <group>
+                <field name="type"/>
+                <field name="user_id"/>
+                <field name="department_id"/>
+                <field name="needs_repair"/>
+                <field name="edit_due_date" invisible="1"/>
+                <field name="edit_lines" invisible="1"/>
+              </group>
+              <group>
+                <field name="due_date"
+                  attrs="{'invisible': [('type', '=', 'long')], 'readonly': [('edit_due_date', '=', False)]}"/>
+                <field name="check_out"/>
+                <field name="check_in"/>
+                <field name="over_due" attrs="{'invisible': [('over_due', '=', False)]}"/>
+              </group>
+            </group>
+
+            <notebook>
+              <page name="items" string="Loan Items">
+                <field name="equipment_loan_line_ids" attrs="{'readonly': [('edit_lines', '=', False)]}">
+                  <tree editable="bottom">
+                    <field name="item_id"/>
+                    <field name="item_category"/>
+                    <field name="accessory_ids" widget="many2many_tags"/>
+                    <field name="state"/>
+                    <field name="due_date" readonly="1"/>
+                    <field name="check_in"/>
+                    <button name="button_return" type="object"
+                        groups="mdlu_equipment_management.group_equipment_management_manager"
+                        states="checked_out,due_soon,over_due"
+                        icon="fa-sign-in" title="Check In" style="color:green;"/>
+                    <button name="button_renew_line" type="object"
+                        groups="mdlu_equipment_management.group_equipment_management_manager"
+                        states="checked_out,due_soon,over_due,renew"
+                        icon="fa-refresh" title="Renew" style="color:blue;"/>
+                  </tree>
+                  <form>
+                    <sheet>
+                      <group>
+                        <group>
+                          <field name="item_id"/>
+                          <field name="item_category"/>
+                        </group>
+                        <group>
+                          <field name="loan_id"/>
+                        </group>
+                      </group>
+                      <field name="accessory_ids"/>
+                    </sheet>
+                  </form>
+                </field>
+              </page>
+              <page name="description_page" string="Description">
+                  <field name="description" type="html" attrs="{'readonly': [('state', 'in', ('new','needs_approval'))]}"/>
+                  <div class="oe_clear"/>
+              </page>
+            </notebook>
+
+          </sheet>
+          <div class="oe_chatter">
+            <field name="message_follower_ids" widget="mail_followers"/>
+            <field name="message_ids" widget="mail_thread"/>
+          </div>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_equipment_loan_line_form_view" model="ir.ui.view">
+      <field name="name">Equipment Loan Line</field>
+      <field name="model">equipment.loan.line</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <group>
+                <field name="item_id"/>
+                <field name="item_category"/>
+              </group>
+              <group>
+                <field name="loan_id"/>
+              </group>
+            </group>
+            <field name="accessory_ids"/>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+
+    <!-- Search View for Asset Loan Management -->
+    <record id="view_equipment_loan_search" model="ir.ui.view">
+        <field name="name">equipment.loan.search</field>
+        <field name="model">equipment.loan</field>
+        <field name="arch" type="xml">
+            <search string="Equipment Management">
+                <field name="type"/>
+                <field name="partner_id"/>
+                <field name="state"/>
+
+                <filter name="long_term" string="Long Term" domain="[('type','=', 'long')]"/>
+                <filter name="short_term" string="Short Term" domain="[('type','=','short')]"/>
+                <filter name="new" string="New" domain="[('state', '=', 'new')]"/>
+                <filter name="needs_approval" string="Needs Approval" domain="[('state', '=', 'needs_approval')]"/>
+                <filter name="approved" string="Approved" domain="[('state', '=', 'approved')]"/>
+                <filter name="checked_out" string="Checked Out" domain="[('state', '=', 'checked_out')]"/>
+                <filter name="active" string="Active" domain="[('state', 'not in', ('returned', 'cancelled', 'rejected'))]"/>
+                <filter name="inactive" string="Inactive" domain="[('state', 'in', ('returned', 'cancelled', 'rejected'))]"/>
+                <separator/>
+                <filter name="warning" string="Close to Due" domain="[('over_due_warning', '=', True)]"/>
+                <filter name="over_due" string="Over Due" domain="[('over_due', '=', True)]"/>
+                <filter name="renew_request" string="Renew Request" domain="[('renew_request', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Loan Type" name="loan_type" context="{'group_by': 'type'}"/>
+                    <filter string="Requested By" name="requested" context="{'group_by':'partner_id'}"/>
+                    <filter string="Check Out" name="check_out" context="{'group_by':'check_out'}"/>
+                    <filter string="Status" name="status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="equipment_loan_action" model="ir.actions.act_window">
+        <field name="name">Equipment Loan</field>
+        <field name="res_model">equipment.loan</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder" type="html">
+                This asset has not been loaned out.
+            </p><p>
+                The loan records of this asset will be displayed here.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_equipment_loan_management" model="ir.actions.act_window">
+        <field name="name">Equipment Loan</field>
+        <field name="res_model">equipment.loan</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_active':1,}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder" type="html">
+                There are currently no equipment loans.
+            </p><p>
+                The loan records will be displayed here.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_equipment_loan_needs_approval" model="ir.actions.act_window">
+        <field name="name">Equipment Loans Needing Approval</field>
+        <field name="res_model">equipment.loan</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state', '=', 'needs_approval')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder" type="html">
+                There are currently no asset loans requiring approval.
+            </p><p>
+                Loan records requiring approval will be displayed here.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_equipment_loan_approved" model="ir.actions.act_window">
+        <field name="name">Approved Equipment Loans</field>
+        <field name="res_model">equipment.loan</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state', '=', 'approved')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder" type="html">
+                There are currently not any approved loans waiting to be checked out.
+            </p><p>
+                Approved loan records will be displayed here.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_equipment_loan_long" model="ir.actions.act_window">
+        <field name="name">Long Term Equipment Loans</field>
+        <field name="res_model">equipment.loan</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('type', '=', 'long')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder" type="html">
+                There are currently no Long Term asset loans.
+            </p><p>
+                Long Term loan records will be displayed here.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_equipment_loan_short" model="ir.actions.act_window">
+        <field name="name">Short Term Equipment Loans</field>
+        <field name="res_model">equipment.loan</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('type', '=', 'short')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder" type="html">
+                There are currently no Short Term asset loans.
+            </p><p>
+                Short Term loan records will be displayed here.
+            </p>
+        </field>
+    </record>
+
+    <!-- Top menu item -->
+    <menuitem id="menu_equipment_loan_management_root"
+        name="Equipment Loan"
+        web_icon="mdlu_equipment_management,static/description/equipment_loan.png"
+        action="action_equipment_loan_management"
+        groups="mdlu_equipment_management.group_equipment_management_manager,mdlu_equipment_management.group_equipment_management_user"
+        />
+
+    <!-- menu categories -->
+    <menuitem name="Equipment Loan"
+      id="mdlu_equipment_loan_management"
+      parent="menu_equipment_loan_management_root"
+      groups="mdlu_equipment_management.group_equipment_management_manager"
+      />
+
+    <menuitem name="Short Term Equipment Loans"
+      id="mdlu_equipment_loan_short_term"
+      parent="mdlu_equipment_loan_management"
+      action="action_equipment_loan_short"
+      sequence="10"
+      />
+
+    <menuitem name="Long Term Equipment Loans"
+      id="mdlu_equipment_loan_long_term"
+      parent="mdlu_equipment_loan_management"
+      action="action_equipment_loan_long"
+      sequence="20"
+      />
+
+    <menuitem name="Needs Approval"
+      id="mdlu_equipment_loan_needs_approval"
+      parent="mdlu_equipment_loan_management"
+      action="action_equipment_loan_needs_approval"
+      sequence="30"
+      />
+
+    <menuitem name="Approved Equipment Loans"
+      id="mdlu_equipment_loan_approved"
+      parent="mdlu_equipment_loan_management"
+      action="action_equipment_loan_approved"
+      sequence="40"
+      />
+
+</odoo>

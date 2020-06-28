@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <record id="mdlu_equipment_management_partner_pr_form" model="ir.ui.view">
+    <field name="name">mdlu.equipment.management.pr.partner.form</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="mdlu_purchase_request.mdlu_purchase_request_partner_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group[@name='purchase_requests']" position="after">
+          <group string="Equipment Loan" name="equipment_loans">
+            <field name="equipment_loan_allowed" string="Can Borrow Equipment"/>
+            <field name="equipment_manager" attrs="{'required': [('equipment_loan_allowed','=',True)], 'invisible': [('equipment_loan_allowed','=',False)],}"/>
+          </group>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="mdlu_equipment_management_partner_form" model="ir.ui.view">
+    <field name="name">mdlu.equipment.management.partner.form</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_partner_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//notebook" position="inside">
+        <page name="loaned_items" string="Loaned Items" attrs="{'invisible': [('equipment_loan_allowed','=',False)]}">
+          <field name="loaned_equipment_ids">
+            <tree decoration-danger="state in ('over_due')">
+              <field name="item_id"/>
+              <field name="accessory_ids" widget="many2many_tags"/>
+              <field name="date_out"/>
+              <field name="due_date"/>
+              <field name="state" string="Loan Status"/>
+            </tree>
+          </field>
+        </page>
+      </xpath>
+    </field>
+  </record>
+</odoo>

@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Equipment Request Tree View -->
+  <record model="ir.ui.view" id="mdlu_equipment_request_list">
+    <field name="name">equipment.request.form.tree</field>
+    <field name="model">equipment.request</field>
+    <field name="arch" type="xml">
+      <tree>
+        <field name="name"/>
+        <field name="user_id"/>
+        <field name="assigned_to"/>
+        <field name="request_date"/>
+        <field name="state"/>
+      </tree>
+    </field>
+  </record>
+
+  <!-- Equipment Request Form View -->
+  <record model="ir.ui.view" id="mdlu_equipment_request_form">
+    <field name="name">equipment.request.form</field>
+    <field name="model">equipment.request</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <button name="action_draft"
+            states="needs_approval,cancelled,rejected"
+            string="Reset"
+            type="object"/>
+          <button name="action_request_approval"
+            states="draft" class="oe_highlight"
+            string="Submit Request"
+            type="object"/>
+          <button name="action_approve"
+            states="needs_approval,partial_approve"
+            string="Approve"
+            type="object" class="oe_highlight"
+            groups="mdlu_equipment_management.group_equipment_management_manager"/>
+          <button name="action_reject"
+            states="needs_approval"
+            string="Reject"
+            type="object"
+            groups="mdlu_equipment_management.group_equipment_management_manager"/>
+          <button name="action_cancel"
+            string="Cancel"
+            attrs="{'invisible': [('state','in', ('cancelled','rejected','ordered'))]}"
+            type="object"/>
+          <field name="state" widget="statusbar"
+            statusbar_visible="draft,needs_approval,approved,rejected"
+            statusbar_colors='{"approved":"blue"}'/>
+        </header>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="action_view_loans"
+                type="object"
+                class="oe_stat_button"
+                icon="fa-tablet"
+                attrs="{'invisible': [('loan_count', '=', 0)]}">
+                <field name="loan_count" widget="statinfo" string="Loans"/>
+            </button>
+            <button name="action_view_prs"
+                type="object"
+                class="oe_stat_button"
+                icon="fa-credit-card"
+                attrs="{'invisible': [('pr_count', '=', 0)]}">
+                <field name="pr_count" widget="statinfo" string="PRs"/>
+            </button>
+          </div>
+          <div class="oe_edit_only">
+            <label for="name" class="oe_inline"/>
+          </div>
+          <h1>
+              <field name="name" class="oe_inline"/>
+          </h1>
+          <group>
+            <group>
+              <field name="user_id"/>
+              <field name="assigned_to"/>
+            </group>
+            <group>
+              <field name="company_id"/>
+              <field name="request_date" attrs="{'invisible': [('request_date','=', False)]}"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Requested Items">
+              <field name="request_line_ids">
+                <tree edit="false">
+                  <field name="product_id"/>
+                  <field name="product_qty"/>
+                  <field name="product_uom_id"/>
+                  <field name="price_unit"/>
+                  <field name="vendor_id"/>
+                  <field name="type"/>
+                  <field name="purchase_request_id"/>
+                  <field name="pr_state"/>
+                  <field name="loan_id"/>
+                  <field name="loan_state"/>
+                  <field name="state"/>
+                  <field name="request_state" invisible="1"/>
+                  <button name="action_approve" type="object"
+                    groups="mdlu_equipment_management.group_equipment_management_manager"
+                    attrs="{'invisible':  ['|',('request_state', 'not in', ('needs_approval', 'partial_approve')), ('state', 'not in', ('needs_approval'))]}"
+                    icon="fa-check" title="Approve" style="color:green;"/>
+                  <button name="action_cancel" type="object"
+                    attrs="{'invisible': ['|',('request_state', 'in', ('approved', 'rejected', 'cancelled')), ('state', 'in', ('rejected', 'cancelled'))]}"
+                    icon="fa-ban" title="Cancel" style="color:red;"/>
+                  <button name="action_reject" type="object"
+                    groups="mdlu_equipment_management.group_equipment_management_manager"
+                    attrs="{'invisible': ['|',('request_state', 'in', ('draft', 'approved', 'rejected', 'cancelled')), ('state', 'not in', ('needs_approval'))]}"
+                    icon="fa-times" title="Reject" style="color:red;"/>
+                  <button name="action_draft" type="object"
+                    groups="mdlu_equipment_management.group_equipment_management_manager"
+                    attrs="{'invisible': ['|', ('request_state', 'in', ('approved', 'rejected', 'cancelled')), ('state', 'in', ('draft','needs_approval',))]}"
+                    icon="fa-refresh" title="Reset" style="color:blue;"/>
+                </tree>
+                <form>
+                  <header>
+                    <field name="request_state" invisible="1"/>
+                    <button name="action_approve" type="object" class="oe_highlight"
+                      groups="mdlu_equipment_management.group_equipment_management_manager"
+                      attrs="{'invisible': ['|',('request_state', 'not in', ('needs_approval','partial_approve')), ('state', 'not in', ('needs_approval'))]}"
+                      string="Approve"/>
+                    <button name="action_cancel" type="object"
+                      attrs="{'invisible': ['|',('request_state', 'in', ('approved', 'rejected', 'cancelled')), ('state', 'in', ('rejected', 'cancelled', ))]}"
+                      string="Cancel"/>
+                    <button name="action_reject" type="object"
+                      groups="mdlu_equipment_management.group_equipment_management_manager"
+                      attrs="{'invisible': ['|',('request_state', 'in', ('draft', 'approved', 'rejected', 'cancelled')), ('state', 'in', ('approved', 'rejected', 'cancelled', ))]}"
+                      string="Reject"/>
+                    <button name="action_draft" type="object"
+                      groups="mdlu_equipment_management.group_equipment_management_manager"
+                      attrs="{'invisible': ['|',('request_state', 'in', ('approved', 'rejected', 'cancelled')), ('state', 'in', ('draft', 'needs_approval', ))]}"
+                      string="Reset"/>
+                    <field name="state" widget="statusbar"
+                      statusbar_visible="draft,needs_approval,approved,rejected"
+                      statusbar_colors='{"approved":"blue"}'/>
+                  </header>
+                  <sheet>
+                    <div class="oe_button_box" name="button_box">
+                      <button name="action_view_loan"
+                          type="object"
+                          class="oe_stat_button"
+                          icon="fa-tablet"
+                          attrs="{'invisible': [('loan_id', '=', False)]}">
+                          <field name="loan_id"/>
+                      </button>
+                      <button name="action_view_pr"
+                          type="object"
+                          class="oe_stat_button"
+                          icon="fa-credit-card"
+                          attrs="{'invisible': [('purchase_request_id', '=', False)]}">
+                          <field name="purchase_request_id"/>
+                      </button>
+                    </div>
+                    <group>
+                      <field name="product_id"/>
+                      <field name="type"/>
+                    </group>
+                    <group>
+                      <group>
+                        <field name="name"/>
+                        <field name="vendor_id"/>
+                        <label for="product_qty" string="Quantity"/>
+                        <div>
+                          <field name="product_qty"  class="oe_inline"/>
+                          <field name="product_uom_id"  class="oe_inline" readonly="1"/>
+                        </div>
+                        <field name="price_unit" widget="monetary"/>
+                        <field name="analytic_account_id"/>
+                        <field name="web_address" widget="url" placeholder="e.g. https://www.moddulu.com"/>
+                      </group>
+                      <group>
+                        <field name="reason"/>
+                        <field name="specifications"/>
+                        <field name="force_purchase" groups="mdlu_equipment_management.group_equipment_management_manager"/>
+                      </group>
+                    </group>
+
+                    <field name="move_line_count" invisible="1"/>
+                    <field name="loan_line_count" invisible="1"/>
+                    <notebook>
+                      <page string="Loaned Items" attrs="{'invisible': [('loan_line_count','=',0)]}">
+                        <field name="loan_line_ids">
+                          <tree editable="false">
+                            <field name="loan_id"/>
+                            <field name="item_id"/>
+                            <field name="item_category"/>
+                            <field name="accessory_ids" widget="many2many_tags"/>
+                            <field name="state"/>
+                            <field name="check_in"/>
+                            <button name="button_return" type="object"
+                                groups="mdlu_equipment_management.group_equipment_management_manager"
+                                states="checked_out"
+                                icon="fa-sign-in" title="Check In" style="color:green;"/>
+                          </tree>
+                        </field>
+                      </page>
+                      <page string="Transfers" attrs="{'invisible': [('move_line_count','=',0)]}">
+                        <field name="move_line_ids">
+                          <tree editable="false">
+                            <field name="picking_id"/>
+                            <field name="product_id"/>
+                            <field name="product_qty"/>
+                            <field name="qty_done"/>
+                            <field name="state"/>
+                          </tree>
+                        </field>
+                      </page>
+                    </notebook>
+                  </sheet>
+                </form>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <div class="oe_chatter">
+          <field name="message_follower_ids" widget="mail_followers"/>
+          <field name="message_ids" widget="mail_thread"/>
+        </div>
+      </form>
+    </field>
+  </record>
+
+  <!-- Request Search -->
+  <record id="view_equipment_request_search" model="ir.ui.view">
+    <field name="name">equipment.request.search</field>
+    <field name="model">equipment.request</field>
+    <field name="arch" type="xml">
+      <search string="Equipment Requests">
+        <field name="name"/>
+        <field name="user_id"/>
+        <field name="assigned_to"/>
+        <field name="message_needaction"/>
+        <field name="state"/>
+        <!-- <filter name="" string="" domain="[('','','')]"/> -->
+        <filter name="require_my_attention" string="Requires My Attention" domain="['|',('user_id','=',uid),('assigned_to','=',uid)]"/>
+        <separator/>
+        <filter name="my_requests" string="My Requests" domain="[('user_id','=',uid)]"/>
+        <filter name="assigned_to_me" string="Assigned to Me" domain="[('assigned_to','=',uid)]"/>
+        <separator/>
+        <filter name="new_requests" string="New Requests" domain="[('state','=','draft')]"/>
+        <filter name="needs_approval" string="Need to be Approved" domain="[('state','=','needs_approval')]"/>
+        <filter name="approved" string="Approved" domain="[('state','=','approved')]"/>
+        <filter name="cancelled" string="Cancelled" domain="[('state','=','cancelled')]"/>
+        <filter name="rejected" string="Rejected" domain="[('state','=','rejected')]"/>
+        <separator/>
+        <filter name="request_date" string="Request Date" date="request_date"/>
+        <group expand="0" string="Group By">
+          <filter name="state" string="Status" context="{'group_by': 'state'}"/>
+          <filter name="user" string="Requested By" context="{'group_by': 'user_id'}"/>
+          <filter name="assigned" string="Assigned To" context="{'group_by': 'assigned_to'}"/>
+          <filter name="company" string="Company" context="{'group_by': 'company_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- Request Line Tree -->
+  <record model="ir.ui.view" id="mdlu_equipment_request_line_list">
+    <field name="name">equipment.request.line.tree</field>
+    <field name="model">equipment.request.line</field>
+    <field name="arch" type="xml">
+      <tree create="false">
+        <field name="request_id"/>
+        <field name="requested_by"/>
+        <field name="product_id"/>
+        <field name="product_qty"/>
+        <field name="product_uom_id"/>
+        <field name="price_unit"/>
+        <field name="vendor_id"/>
+        <field name="type"/>
+      </tree>
+    </field>
+  </record>
+
+  <!-- Request Line Form -->
+  <record model="ir.ui.view" id="mdlu_equipment_request_line_form">
+    <field name="name">equipment.request.line.form</field>
+    <field name="model">equipment.request.line</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+          <field name="request_state" invisible="1"/>
+          <button name="action_approve" type="object" class="oe_highlight"
+            groups="mdlu_equipment_management.group_equipment_management_manager"
+            attrs="{'invisible': ['|',('request_state', 'not in', ('needs_approval','partial_approve')), ('state', 'not in', ('needs_approval'))]}"
+            string="Approve"/>
+          <button name="action_cancel" type="object"
+            attrs="{'invisible': ['|',('request_state', 'in', ('approved', 'rejected', 'cancelled')), ('state', 'in', ('rejected', 'cancelled', ))]}"
+            string="Cancel"/>
+          <button name="action_reject" type="object"
+            groups="mdlu_equipment_management.group_equipment_management_manager"
+            attrs="{'invisible': ['|',('request_state', 'in', ('draft', 'approved', 'rejected', 'cancelled')), ('state', 'in', ('approved', 'rejected', 'cancelled', ))]}"
+            string="Reject"/>
+          <button name="action_draft" type="object"
+            groups="mdlu_equipment_management.group_equipment_management_manager"
+            attrs="{'invisible': ['|',('request_state', 'in', ('approved', 'rejected', 'cancelled')), ('state', 'in', ('draft', 'needs_approval',))]}"
+            string="Reset"/>
+          <field name="state" widget="statusbar"
+            statusbar_visible="draft,needs_approval,approved,rejected"
+            statusbar_colors='{"approved":"blue"}'/>
+        </header>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="action_view_loan"
+                type="object"
+                class="oe_stat_button"
+                icon="fa-credit-card"
+                attrs="{'invisible': [('loan_id', '=', False)]}">
+                <field name="loan_id" invisible="1"/>
+            </button>
+            <button name="action_view_pr"
+                type="object"
+                class="oe_stat_button"
+                icon="fa-credit-card"
+                attrs="{'invisible': [('purchase_request_id', '=', False)]}">
+                <field name="purchase_request_id" invisible="1"/>
+            </button>
+          </div>
+          <group>
+            <field name="product_id"/>
+            <field name="type" attrs="{'readonly': [('state','not in', ('draft'))]}"/>
+          </group>
+          <group>
+            <group>
+              <field name="name"/>
+              <field name="vendor_id"/>
+              <label for="product_qty" string="Quantity"/>
+              <div>
+                <field name="product_qty"  class="oe_inline"/>
+                <field name="product_uom_id" class="oe_inline"/>
+              </div>
+              <field name="price_unit" widget="monetary"/>
+              <field name="analytic_account_id"/>
+              <field name="web_address" widget="url" placeholder="e.g. https://www.moddulu.com"/>
+            </group>
+            <group>
+              <field name="reason"/>
+              <field name="specifications"/>
+              <field name="request_id"/>
+              <field name="force_purchase" groups="mdlu_equipment_management.group_equipment_management_manager"/>
+            </group>
+          </group>
+          <field name="move_line_count" invisible="1"/>
+          <field name="loan_line_count" invisible="1"/>
+          <notebook>
+            <page name="loaned_items" string="Loaned Items" attrs="{'invisible': [('loan_line_count','=',0)]}">
+              <field name="loan_line_ids">
+                <tree editable="false">
+                  <field name="loan_id"/>
+                  <field name="item_id"/>
+                  <field name="item_category"/>
+                  <field name="accessory_ids" widget="many2many_tags"/>
+                  <field name="state"/>
+                  <field name="check_in"/>
+                  <button name="button_return" type="object"
+                      groups="mdlu_equipment_management.group_equipment_management_manager"
+                      states="checked_out"
+                      icon="fa-sign-in" title="Check In" style="color:green;"/>
+                </tree>
+              </field>
+            </page>
+            <page name="transfers" string="Transfers" attrs="{'invisible': [('move_line_count','=',0)]}">
+              <field name="move_line_ids">
+                <tree editable="false">
+                  <field name="picking_id"/>
+                  <field name="product_id"/>
+                  <field name="product_qty"/>
+                  <field name="qty_done"/>
+                  <field name="state"/>
+                </tree>
+              </field>
+            </page>
+          </notebook>
+        </sheet>
+        <div class="oe_chatter">
+          <field name="message_follower_ids" widget="mail_followers"/>
+          <field name="message_ids" widget="mail_thread"/>
+        </div>
+      </form>
+    </field>
+  </record>
+
+  <!-- Request Line Search View -->
+  <record id="view_equipment_request_line_search" model="ir.ui.view">
+    <field name="name">equipment.request.line.search</field>
+    <field name="model">equipment.request</field>
+    <field name="arch" type="xml">
+      <search string="Equipment Request Lines">
+        <field name="state"/>
+        <!-- <filter name="" string="" domain="[('','','')]"/> -->
+        <filter name="assigned_to_me" string="Assigned to Me" domain="[('request_assigned_to','=',uid)]"/>
+        <filter name="new_requests" string="New Requests" domain="[('state','=','draft')]"/>
+        <filter name="needs_approval" string="Need to be Approved" domain="[('state','=','needs_approval')]"/>
+        <filter name="approved" string="Approved" domain="[('state','=','approved')]"/>
+        <filter name="cancelled" string="Cancelled" domain="[('state','=','cancelled')]"/>
+        <filter name="rejected" string="Rejected" domain="[('state','=','rejected')]"/>
+        <filter name="loaned" string="Loaned" domain="[('state','=','loaned')]"/>
+        <filter name="loan_requested" string="Loan Requested" domain="[('state','=','loan_requested')]"/>
+        <filter name="purchased" string="Purchased" domain="[('state','=','purchased')]"/>
+        <filter name="purchase_requested" string="Purchase Requested" domain="[('state','=','purchase_requested')]"/>
+        <filter name="received" string="Received" domain="[('state','=','received')]"/>
+        <filter name="returned" string="Returned" domain="[('state','=','returned')]"/>
+        <group expand="0" string="Group By">
+          <filter name="state" string="Status" context="{'group_by': 'state'}"/>
+          <filter name="request_state" string="Request Status" context="{'group_by': 'request_state'}"/>
+          <filter name="assigned_to" string="Assigned To" context="{'group_by': 'request_assigned_to'}"/>
+          <filter name="company" string="Company" context="{'group_by': 'company_id'}"/>
+          <filter name="loan_type" string="Loan Type" context="{'group_by': 'type'}"/>
+          <separator/>
+          <filter name="loan" string="Equipment Loan" context="{'group_by': 'loan_id'}"/>
+          <filter name="loan_state" string="Loan State" context="{'group_by': 'loan_state'}"/>
+          <separator/>
+          <filter name="purchase_request" string="Purchase Request" context="{'group_by': 'purchase_request_id'}"/>
+          <filter name="pr_state" string="Purchase Request Status" context="{'group_by': 'pr_state'}"/>
+          <filter name="vendor" string="Vendor" context="{'group_by': 'vendor_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+
+  <!-- Request Action -->
+  <record id="action_equipment_request" model="ir.actions.act_window">
+      <field name="name">Equipment Request</field>
+      <field name="res_model">equipment.request</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="context">{'search_default_require_my_attention': 1}</field>
+      <field name="search_view_id" ref="view_equipment_request_search"/>
+      <field name="help" type="html">
+          <p class="o_view_nocontent_empty_folder" type="html">
+              There are currently no equipment requests.
+          </p><p>
+              The request records will be displayed here.
+          </p>
+      </field>
+  </record>
+
+  <!-- Requst Line Approval Action -->
+  <record id="action_equipment_request_lines_needs_approval" model="ir.actions.act_window">
+      <field name="name">Equipment Request Lines</field>
+      <field name="res_model">equipment.request.line</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="domain">[('state','=','needs_approval'),('request_assigned_to','=',uid)]</field>
+      <!-- <field name="context">{'search_default_state_needs_approval': 1, 'search_default_assigned_to_me':1,}</field> -->
+      <field name="search_view_id" ref="view_equipment_request_line_search"/>
+      <field name="help" type="html">
+          <p class="o_view_nocontent_empty_folder" type="html">
+              There are currently no equipment requests lines that need approval.
+          </p><p>
+              The request lines will be displayed here.
+          </p>
+      </field>
+  </record>
+
+  <!-- Top menu item -->
+  <menuitem id="menu_equipment_request_root"
+      name="Equipment Request"
+      web_icon="mdlu_equipment_management,static/description/icon.png"
+      />
+
+  <menuitem id="menu_equipment_request"
+    name="Equipment Request"
+    parent="menu_equipment_request_root"/>
+
+  <!-- Menu Items -->
+  <menuitem id="menu_equipment_requests"
+    name="Equipment Requests"
+    parent="menu_equipment_request"
+    sequence="1"
+    action="action_equipment_request"/>
+
+  <menuitem id="menu_equipment_request_line_approval"
+    name="Items to Approve"
+    parent="menu_equipment_request"
+    action="action_equipment_request_lines_needs_approval"
+    groups="mdlu_equipment_management.group_equipment_management_manager,mdlu_equipment_management.group_equipment_management_user"
+    sequence="10"/>
+
+  <menuitem id="menu_equipment_loan"
+      name="Equipment Loan"
+      parent="menu_equipment_request"
+      action="action_equipment_loan_management"
+      groups="mdlu_equipment_management.group_equipment_management_manager,mdlu_equipment_management.group_equipment_management_user"
+      sequence="20"/>
+
+  <menuitem id="menu_purchase_request"
+      name="Purchase Requests"
+      parent="menu_equipment_request"
+      action="mdlu_purchase_request.purchase_request_form_action"
+      groups="mdlu_purchase_request.group_purchase_request_user,mdlu_purchase_request.group_purchase_request_manager"
+      sequence="30"/>
+
+</odoo>

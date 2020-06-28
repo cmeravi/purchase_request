@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="mdlu_crm_team_assign_view_form" model="ir.ui.view">
+    <field name="name">mdlu.crm.team.assign.view.form</field>
+    <field name="model">crm.team</field>
+    <field name="inherit_id" ref="sales_team.crm_team_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//group[@name='right']" position="inside">
+        <field name="override_user"/>
+        <field name="lead_assignment"/>
+        <field name="next_team_member" attrs="{'invisible': [('lead_assignment','!=','crm_team_next')]}"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

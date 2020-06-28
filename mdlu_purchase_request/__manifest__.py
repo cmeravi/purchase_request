@@ -6,7 +6,7 @@
     'summary': 'This module is designed to allow employees to make request items that may require purchasing approval.',
     'images': ['static/description/banner.png',],
     'price': 30.00,
-    'currency': 'USD',
+    'currency': 'EUR',
 
     'category': 'Purchases',
     'depends': [
