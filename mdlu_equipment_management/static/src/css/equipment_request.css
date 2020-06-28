@@ -1,9 +1,0 @@
-label.error {
-  color: red;
-  font-style: italic;
-  font-size: xx-small;
-}
-
-input.error {
-  border: 1px solid red;
-}
